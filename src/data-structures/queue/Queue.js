@@ -1,58 +1,30 @@
 import LinkedList from '../linked-list/LinkedList';
 
 export default class Queue {
-  constructor() {
-    // We're going to implement Queue based on LinkedList since the two
-    // structures are quite similar. Namely, they both operate mostly on
-    // the elements at the beginning and the end. Compare enqueue/dequeue
-    // operations of Queue with append/deleteHead operations of LinkedList.
-    this.linkedList = new LinkedList();
+  constructor(){
+    this.index = 0;
+    this.data = new Array(50);
   }
-
-  /**
-   * @return {boolean}
-   */
-  isEmpty() {
-    return !this.linkedList.head;
+  enqueue(item){
+    //this.data.push(item);
+    //this.data = [...this.data, item];
+    this.data[this.index++] = item;
   }
-
-  /**
-   * Read the element at the front of the queue without removing it.
-   * @return {*}
-   */
-  peek() {
-    if (!this.linkedList.head) {
+  dequeue(){
+    if(this.isEmpty()){
       return null;
     }
-
-    return this.linkedList.head.value;
+    const [first, ...restOfData] = this.data;
+    this.data = restOfData;
+    return first;
+    //return this.data.shift();
   }
 
-  /**
-   * Add a new element to the end of the queue (the tail of the linked list).
-   * This element will be processed after all elements ahead of it.
-   * @param {*} value
-   */
-  enqueue(value) {
-    this.linkedList.append(value);
+  peek(){
+    return this.isEmpty() ? null : this.data[0];
   }
 
-  /**
-   * Remove the element at the front of the queue (the head of the linked list).
-   * If the queue is empty, return null.
-   * @return {*}
-   */
-  dequeue() {
-    const removedHead = this.linkedList.deleteHead();
-    return removedHead ? removedHead.value : null;
-  }
-
-  /**
-   * @param [callback]
-   * @return {string}
-   */
-  toString(callback) {
-    // Return string representation of the queue's linked list.
-    return this.linkedList.toString(callback);
+  isEmpty(){
+    return this.data.length === 0;
   }
 }

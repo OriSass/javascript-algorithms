@@ -1,98 +1,69 @@
-import MinHeap from '../heap/MinHeap';
-import Comparator from '../../utils/comparator/Comparator';
 
 // It is the same as min heap except that when comparing two elements
 // we take into account its priority instead of the element's value.
-export default class PriorityQueue extends MinHeap {
-  constructor() {
-    // Call MinHip constructor first.
-    super();
-
-    // Setup priorities map.
-    this.priorities = new Map();
-
-    // Use custom comparator for heap elements that will take element priority
-    // instead of element value into account.
-    this.compare = new Comparator(this.comparePriority.bind(this));
+export default class PriorityQueue{
+  constructor(){
+    this.data = [];
   }
-
-  /**
-   * Add item to the priority queue.
-   * @param {*} item - item we're going to add to the queue.
-   * @param {number} [priority] - items priority.
-   * @return {PriorityQueue}
-   */
-  add(item, priority = 0) {
-    this.priorities.set(item, priority);
-    super.add(item);
-    return this;
-  }
-
-  /**
-   * Remove item from priority queue.
-   * @param {*} item - item we're going to remove.
-   * @param {Comparator} [customFindingComparator] - custom function for finding the item to remove
-   * @return {PriorityQueue}
-   */
-  remove(item, customFindingComparator) {
-    super.remove(item, customFindingComparator);
-    this.priorities.delete(item);
-    return this;
-  }
-
-  /**
-   * Change priority of the item in a queue.
-   * @param {*} item - item we're going to re-prioritize.
-   * @param {number} priority - new item's priority.
-   * @return {PriorityQueue}
-   */
-  changePriority(item, priority) {
-    this.remove(item, new Comparator(this.compareValue));
-    this.add(item, priority);
-    return this;
-  }
-
-  /**
-   * Find item by ite value.
-   * @param {*} item
-   * @return {Number[]}
-   */
-  findByValue(item) {
-    return this.find(item, new Comparator(this.compareValue));
-  }
-
-  /**
-   * Check if item already exists in a queue.
-   * @param {*} item
-   * @return {boolean}
-   */
-  hasValue(item) {
-    return this.findByValue(item).length > 0;
-  }
-
-  /**
-   * Compares priorities of two items.
-   * @param {*} a
-   * @param {*} b
-   * @return {number}
-   */
-  comparePriority(a, b) {
-    if (this.priorities.get(a) === this.priorities.get(b)) {
-      return 0;
+  peek(){
+    if(this.data.length > 0){
+      return this.data[0].value;
     }
-    return this.priorities.get(a) < this.priorities.get(b) ? -1 : 1;
+    return null;
   }
-
-  /**
-   * Compares values of two items.
-   * @param {*} a
-   * @param {*} b
-   * @return {number}
-   */
-  compareValue(a, b) {
-    if (a === b) {
-      return 0;
+  add(value, priority){
+    let added = false;
+    let item = {value: value, priority: priority};
+    let edgeCaseStart = this.data.length === 0; // empty array
+    let edgeCaseEnd;
+    this.data.length > 0 ?
+      edgeCaseEnd = priority >= this.data[this.data.length - 1].priority : edgeCaseEnd = false; // added is in the lowest priority
+    let edgeCaseMid = this.data.length === 1; // 1 value in array
+    
+    // edge cases
+    if(edgeCaseStart || edgeCaseEnd){
+        this.data.push(item);
+        added = true;
     }
-    return a < b ? -1 : 1;
+    if(edgeCaseMid && added === false){
+      priority <= this.data[0].priority ? 
+        this.data.unshift(item):
+        this.data.push(item);
+      added = true;
+    }    
+    // all other cases
+    else{ 
+      if(added === false){
+        for(let i = this.data.length - 1; i > 0; i--){
+          if(priority <= this.data[i].priority && 
+             priority >= this.data[i-1].priority){
+                this.data.splice(i,0,item);
+                added = true;
+             }
+        }
+      }
+    }
+    // if added item has the highest prority
+    if(added === false){
+      this.data.unshift(item);
+    }
+  }
+  hasValue(value){
+    return this.data.some(arrItem => arrItem.value === value);
+  }
+  poll(){
+    let item = this.data.shift();
+    return item.value;
+  }
+  changePriority(whereValue, newPriority){
+    let deleteIndex;
+    for(let i = 0; i < this.data.length; i++){
+      if(this.data[i].value === whereValue){
+        deleteIndex = i;
+        break;
+      }
+    }
+    this.data.splice(deleteIndex, 1);
+    this.add(whereValue, newPriority);
   }
 }
